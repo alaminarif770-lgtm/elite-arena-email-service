@@ -10,7 +10,7 @@ app.use(express.json());
 
 // 🟢 হেলথ চেক রুট
 app.get('/', (req, res) => {
-  res.status(200).send("🚀 Elite Arena Dedicated Email Microservice Active!");
+  res.status(200).send("🚀 Elite Arena Dedicated Email Microservice Active & Live!");
 });
 
 // ১. ফায়ারবেস সার্ভিস ইনিশিয়ালাইজেশন
@@ -36,7 +36,7 @@ const db = admin.database();
 // 📧 জিমেইল ট্রান্সপোর্টার ও মাল্টি-অ্যাকাউন্ট রোটেশন পুল
 // ==========================================
 
-// 🎉 ১. ওয়েলকাম মেইলার (Dedicated Welcome Sender)
+// 🎉 ১. ওয়েলকাম মেইলার (Dedicated Welcome Sender - Fast SSL)
 const welcomeTransporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 465,
@@ -45,7 +45,10 @@ const welcomeTransporter = nodemailer.createTransport({
     user: process.env.WELCOME_GMAIL || 'welcome.elitearenabd@gmail.com',
     pass: (process.env.WELCOME_PASS || 'nyxq mxef ikin xupj').replace(/\s+/g, '')
   },
-  tls: { rejectUnauthorized: false }
+  tls: { rejectUnauthorized: false },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 15000
 });
 
 // 🚀 ২. অফার ও ৩,০০০+ কামব্যাক ব্রডকাস্ট রোটেশন পুল
@@ -68,7 +71,9 @@ async function sendRotatedMail(mailOptions, accountIndex = 0) {
       port: 465,
       secure: true,
       auth: { user: selectedAcc.user.trim(), pass: selectedAcc.pass.replace(/\s+/g, '') },
-      tls: { rejectUnauthorized: false }
+      tls: { rejectUnauthorized: false },
+      connectionTimeout: 10000,
+      socketTimeout: 15000
     });
     return poolTransporter.sendMail({
       from: `"ELITE ARENA BD" <${selectedAcc.user}>`,
@@ -198,27 +203,42 @@ function getRebrandEmailTemplate(userName) {
 }
 
 // ==========================================
-// 🔍 ১-ক্লিক টেস্ট রাউট (Direct Browser Test)
+// 🔍 ১-ক্লিক টেস্ট রাউট (Direct 1-Click Test API)
 // ==========================================
 app.get('/api/test-email', async (req, res) => {
   const targetEmail = req.query.email || 'alaminarif770@gmail.com';
+  const emailType = req.query.type || 'welcome'; // welcome, offer, comeback
+
   try {
+    let subject = '🎉 [TEST] স্বাগতম! ELITE ARENA BD-তে আপনার অ্যাকাউন্ট তৈরি সম্পন্ন হয়েছে';
+    let htmlContent = getWelcomeEmailTemplate({
+      name: 'Alamin Arif (Test Player)',
+      supportPin: '7842',
+      email: targetEmail
+    });
+
+    if (emailType === 'offer') {
+      subject = '✨ [TEST] পবিত্র শুক্রবার স্পেশাল ডিপোজিট বোনাস! - ELITE ARENA BD';
+      htmlContent = getFridayOfferEmailTemplate('Alamin Arif (Test Player)');
+    } else if (emailType === 'comeback') {
+      subject = '📢 [TEST] জরুরী নোটিশ: LONE WOLF BD এখন ELITE ARENA BD!';
+      htmlContent = getRebrandEmailTemplate('Alamin Arif (Test Player)');
+    }
+
     const info = await welcomeTransporter.sendMail({
       from: '"ELITE ARENA BD - Official" <welcome.elitearenabd@gmail.com>',
       to: targetEmail.trim(),
-      subject: '🎉 [TEST] স্বাগতম! ELITE ARENA BD-তে আপনার অ্যাকাউন্ট তৈরি সম্পন্ন হয়েছে',
-      html: getWelcomeEmailTemplate({
-        name: 'Alamin Arif (Test Player)',
-        supportPin: '7842',
-        email: targetEmail
-      })
+      subject: subject,
+      html: htmlContent
     });
+
     return res.json({ 
       success: true, 
-      message: `টেস্ট Welcome ইমেইল সফলভাবে পাঠানো হয়েছে ${targetEmail} ঠিকানায়!`,
+      message: `টেস্ট ${emailType.toUpperCase()} ইমেইল সফলভাবে পাঠানো হয়েছে ${targetEmail} ঠিকানায়!`,
       messageId: info.messageId 
     });
   } catch (err) {
+    console.error("Test Email Error:", err);
     return res.status(500).json({ success: false, message: 'ইমেইল পাঠাতে ব্যর্থ!', error: err.message });
   }
 });
@@ -402,5 +422,6 @@ async function startCampaignBroadcast(queue, campaignName, templateFunc, subject
   await statusRef.update({ isRunning: false, statusText: 'Completed', endTime: Date.now() });
 }
 
+// 🟢 Railway ক্লাউড হোস্ট বাইন্ডিং (0.0.0.0)
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`🚀 Elite Arena Dedicated Email Service Running on Port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Elite Arena Dedicated Email Service Running on Port ${PORT}`));
