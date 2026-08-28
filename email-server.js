@@ -26,7 +26,7 @@ try {
       credential: admin.credential.cert(serviceAccount),
       databaseURL: "https://lonewolfbd-6450b-default-rtdb.asia-southeast1.firebasedatabase.app"
     });
-    console.log("✅ Firebase Connected");
+    console.log("✅ Firebase Connected to Email Service");
   }
 } catch (e) {
   console.error("Firebase Error:", e.message);
@@ -35,9 +35,9 @@ try {
 const db = admin.database();
 
 // ==========================================
-// ⚡ গুগল ওয়েবহুক দিয়ে সরাসরি জিমেইল থেকে মেইল পাঠানোর মূল ফাংশন
+// ⚡ গুগল রিলে দিয়ে অ্যান্টি-স্প্যাম মেইল পাঠানোর মূল ফাংশন
 // ==========================================
-async function sendViaGoogleRelay(to, subject, htmlContent, senderName = "ELITE ARENA BD") {
+async function sendViaGoogleRelay(to, subject, htmlContent, plainText = "", senderName = "ELITE ARENA BD") {
   const response = await fetch(GOOGLE_MAIL_WEBHOOK, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -45,6 +45,7 @@ async function sendViaGoogleRelay(to, subject, htmlContent, senderName = "ELITE 
       to: to.trim(),
       subject: subject,
       html: htmlContent,
+      text: plainText || "ELITE ARENA BD - Official Esports Notification",
       name: senderName
     })
   });
@@ -173,7 +174,8 @@ app.get('/api/test-email', async (req, res) => {
   const emailType = req.query.type || 'welcome';
 
   try {
-    let subject = '🎉 [TEST] স্বাগতম! ELITE ARENA BD-তে আপনার অ্যাকাউন্ট তৈরি সম্পন্ন হয়েছে';
+    let subject = 'স্বাগতম! ELITE ARENA BD-তে আপনার অ্যাকাউন্ট তৈরি সম্পন্ন হয়েছে';
+    let plainText = 'স্বাগতম! ELITE ARENA BD-তে আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে।';
     let htmlContent = getWelcomeEmailTemplate({
       name: 'Alamin Arif (Test Player)',
       supportPin: '7842',
@@ -181,15 +183,17 @@ app.get('/api/test-email', async (req, res) => {
     });
 
     if (emailType === 'offer') {
-      subject = '✨ [TEST] পবিত্র শুক্রবার স্পেশাল ডিপোজিট বোনাস! - ELITE ARENA BD';
+      subject = 'পবিত্র শুক্রবার স্পেশাল ডিপোজিট বোনাস! - ELITE ARENA BD';
+      plainText = 'পবিত্র শুক্রবার স্পেশাল ডিপোজিট বোনাস অফার! আজই ডিপোজিট করুন এবং আকর্ষণীয় বোনাস উপভোগ করুন।';
       htmlContent = getFridayOfferEmailTemplate('Alamin Arif (Test Player)');
     } else if (emailType === 'comeback') {
-      subject = '📢 [TEST] জরুরী নোটিশ: LONE WOLF BD এখন ELITE ARENA BD!';
+      subject = 'জরুরী নোটিশ: LONE WOLF BD এখন ELITE ARENA BD!';
+      plainText = 'জরুরী নোটিশ: LONE WOLF BD এর নাম পরিবর্তন করে ELITE ARENA BD করা হয়েছে।';
       htmlContent = getRebrandEmailTemplate('Alamin Arif (Test Player)');
     }
 
-    // গুগল ওয়েবহুক দিয়ে সরাসরি জিমেইল থেকে পাঠানো
-    const result = await sendViaGoogleRelay(targetEmail, subject, htmlContent, "ELITE ARENA BD");
+    // গুগল রিলে দিয়ে সরাসরি জিমেইল থেকে পাঠানো
+    const result = await sendViaGoogleRelay(targetEmail, subject, htmlContent, plainText, "ELITE ARENA BD");
 
     return res.json({ 
       success: true, 
@@ -217,15 +221,17 @@ db.ref('users').on('child_added', async (snapshot) => {
       const now = Date.now();
       const joinedTime = user.joinedAt ? new Date(user.joinedAt).getTime() : now;
 
+      // শুধুমাত্র সাম্প্রতিক (গত ২ ঘণ্টার মধ্যে জয়েন করা) নতুন ইউজারকে পাঠাবে
       if ((now - joinedTime) < 2 * 60 * 60 * 1000) {
         await sendViaGoogleRelay(
           user.email,
-          '🎉 স্বাগতম! ELITE ARENA BD-তে আপনার অ্যাকাউন্ট তৈরি সম্পন্ন হয়েছে',
+          'স্বাগতম! ELITE ARENA BD-তে আপনার অ্যাকাউন্ট তৈরি সম্পন্ন হয়েছে',
           getWelcomeEmailTemplate({
             name: user.name || 'Player',
             supportPin: user.supportPin || 'N/A',
             email: user.email
           }),
+          `স্বাগতম! ELITE ARENA BD-তে আপনার অ্যাকাউন্ট তৈরি সম্পন্ন হয়েছে। আপনার সাপোর্ট পিন: #${user.supportPin || 'N/A'}`,
           "ELITE ARENA BD - Official"
         );
 
@@ -258,7 +264,13 @@ app.post('/api/broadcast-offer', async (req, res) => {
       }
     }
 
-    startCampaignBroadcast(queue, 'Friday Offer', getFridayOfferEmailTemplate, '✨ পবিত্র শুক্রবার স্পেশাল ডিপোজিট বোনাস! - ELITE ARENA BD');
+    startCampaignBroadcast(
+      queue, 
+      'Friday Offer', 
+      getFridayOfferEmailTemplate, 
+      'পবিত্র শুক্রবার স্পেশাল ডিপোজিট বোনাস! - ELITE ARENA BD',
+      'পবিত্র শুক্রবার স্পেশাল ডিপোজিট বোনাস অফার! আজই ডিপোজিট করুন এবং বোনাস উপভোগ করুন।'
+    );
 
     return res.json({
       success: true,
@@ -291,6 +303,7 @@ app.post('/api/broadcast-comeback', async (req, res) => {
 
       const lastActive = u.last_active;
 
+      // 🛑 স্মার্ট ফিল্টারিং: যারা নতুন অ্যাপ খোলেনি বা ৩০ দিন ধরে নেই
       if (!lastActive || (now - lastActive) > THIRTY_DAYS_MS) {
         queue.push({ uid, email: u.email.trim(), name: u.name || 'Player' });
       }
@@ -300,7 +313,13 @@ app.post('/api/broadcast-comeback', async (req, res) => {
       return res.json({ success: false, message: 'কোনো ড্রপ-আউট বা পুরনো ইউজার পাওয়া যায়নি।' });
     }
 
-    startCampaignBroadcast(queue, 'Old User Comeback', getRebrandEmailTemplate, '📢 জরুরী নোটিশ: LONE WOLF BD এখন ELITE ARENA BD!');
+    startCampaignBroadcast(
+      queue, 
+      'Old User Comeback', 
+      getRebrandEmailTemplate, 
+      'জরুরী নোটিশ: LONE WOLF BD এখন ELITE ARENA BD!',
+      'জরুরী নোটিশ: LONE WOLF BD এর নাম পরিবর্তন করে ELITE ARENA BD করা হয়েছে।'
+    );
 
     return res.json({
       success: true,
@@ -315,7 +334,7 @@ app.post('/api/broadcast-comeback', async (req, res) => {
 // ==========================================
 // ⚙️ ব্যাকগ্রাউন্ড ব্রডকাস্ট ইঞ্জিন
 // ==========================================
-async function startCampaignBroadcast(queue, campaignName, templateFunc, subject) {
+async function startCampaignBroadcast(queue, campaignName, templateFunc, subject, plainText) {
   const total = queue.length;
   let successCount = 0;
   let failCount = 0;
@@ -342,7 +361,7 @@ async function startCampaignBroadcast(queue, campaignName, templateFunc, subject
     let failReason = null;
 
     try {
-      await sendViaGoogleRelay(item.email, subject, templateFunc(item.name), "ELITE ARENA BD");
+      await sendViaGoogleRelay(item.email, subject, templateFunc(item.name), plainText, "ELITE ARENA BD");
       isSuccess = true;
       successCount++;
     } catch (err) {
