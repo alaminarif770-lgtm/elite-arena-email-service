@@ -172,7 +172,7 @@ function getFridayOfferEmailTemplate(userName) {
 }
 
 // ==========================================
-// 🎨 ৩. রিব্র্যান্ডিং / কামব্যাক মেইল টেমপ্লেট (User Back)
+// 🎨 ৩. রিব্র্যান্ডিং / কামব্যাক মেইল টেমপ্লেট
 // ==========================================
 function getRebrandEmailTemplate(userName) {
   const name = userName || 'Player';
@@ -198,9 +198,34 @@ function getRebrandEmailTemplate(userName) {
 }
 
 // ==========================================
-// 🤖 ১. স্বয়ংক্রিয় রিয়েলটাইম ওয়েলকাম ইমেইল লিসেনার (Auto Welcome Engine)
+// 🔍 ১-ক্লিক টেস্ট রাউট (Direct Browser Test)
 // ==========================================
-// ডাটাবেজে নতুন ইউজার তৈরি হওয়ামাত্রই এটি নিজে থেকে বুঝতে পারে এবং সাথে সাথে Welcome মেইল পাঠায়
+app.get('/api/test-email', async (req, res) => {
+  const targetEmail = req.query.email || 'alaminarif770@gmail.com';
+  try {
+    const info = await welcomeTransporter.sendMail({
+      from: '"ELITE ARENA BD - Official" <welcome.elitearenabd@gmail.com>',
+      to: targetEmail.trim(),
+      subject: '🎉 [TEST] স্বাগতম! ELITE ARENA BD-তে আপনার অ্যাকাউন্ট তৈরি সম্পন্ন হয়েছে',
+      html: getWelcomeEmailTemplate({
+        name: 'Alamin Arif (Test Player)',
+        supportPin: '7842',
+        email: targetEmail
+      })
+    });
+    return res.json({ 
+      success: true, 
+      message: `টেস্ট Welcome ইমেইল সফলভাবে পাঠানো হয়েছে ${targetEmail} ঠিকানায়!`,
+      messageId: info.messageId 
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: 'ইমেইল পাঠাতে ব্যর্থ!', error: err.message });
+  }
+});
+
+// ==========================================
+// 🤖 ১. স্বয়ংক্রিয় রিয়েলটাইম ওয়েলকাম ইমেইল লিসেনার
+// ==========================================
 db.ref('users').on('child_added', async (snapshot) => {
   try {
     const uid = snapshot.key;
@@ -208,13 +233,11 @@ db.ref('users').on('child_added', async (snapshot) => {
 
     if (!user || !user.email || !user.email.includes('@')) return;
 
-    // চেক করা ওয়েলকাম মেইল ইতিমধ্যে পাঠানো হয়েছে কি না
     const welcomeLogSnap = await db.ref(`welcome_email_logs/${uid}`).once('value');
     if (!welcomeLogSnap.exists()) {
       const now = Date.now();
       const joinedTime = user.joinedAt ? new Date(user.joinedAt).getTime() : now;
 
-      // শুধুমাত্র সাম্প্রতিক (গত ২ ঘণ্টার মধ্যে জয়েন করা) নতুন ইউজারকে পাঠাবে
       if ((now - joinedTime) < 2 * 60 * 60 * 1000) {
         await welcomeTransporter.sendMail({
           from: '"ELITE ARENA BD - Official" <welcome.elitearenabd@gmail.com>',
@@ -237,7 +260,7 @@ db.ref('users').on('child_added', async (snapshot) => {
 });
 
 // ==========================================
-// 🚀 ২. সবার জন্য অফার ব্রডকাস্ট API (Friday Offer Broadcast)
+// 🚀 ২. সবার জন্য অফার ব্রডকাস্ট API
 // ==========================================
 app.post('/api/broadcast-offer', async (req, res) => {
   try {
@@ -249,7 +272,6 @@ app.post('/api/broadcast-offer', async (req, res) => {
     const users = usersSnap.val();
     const queue = [];
 
-    // সকল বৈধ ইউজারকে অফার কিউতে যোগ করা
     for (const uid in users) {
       const u = users[uid];
       if (u.email && u.email.includes('@') && u.isBanned !== true) {
@@ -257,7 +279,6 @@ app.post('/api/broadcast-offer', async (req, res) => {
       }
     }
 
-    // ব্যাকগ্রাউন্ড মাল্টি-জিমেইল রোটেশন ব্রডকাস্ট
     startCampaignBroadcast(queue, 'Friday Offer', getFridayOfferEmailTemplate, '✨ পবিত্র শুক্রবার স্পেশাল ডিপোজিট বোনাস! - ELITE ARENA BD');
 
     return res.json({
@@ -271,7 +292,7 @@ app.post('/api/broadcast-offer', async (req, res) => {
 });
 
 // ==========================================
-// 🎯 ৩. পুরনো ও ড্রপ-আউট ইউজারদের কামব্যাক ব্রডকাস্ট API (Smart Comeback Filter)
+// 🎯 ৩. পুরনো ও ড্রপ-আউট ইউজারদের কামব্যাক ব্রডকাস্ট API
 // ==========================================
 app.post('/api/broadcast-comeback', async (req, res) => {
   try {
@@ -291,25 +312,21 @@ app.post('/api/broadcast-comeback', async (req, res) => {
 
       const lastActive = u.last_active;
 
-      // 🛑 স্মার্ট ফিল্টারিং লজিক:
-      // ১. যারা নতুন ভার্সন এখনও একবারও খোলেনি (!last_active)
-      // ২. অথবা যারা ৩০ দিনের বেশি সময় ধরে অ্যাপে নেই (last_active > ৩০ দিন)
-      // 🟢 যারা বর্তমানে অ্যাক্টিভ আছে তারা স্বয়ংক্রিয়ভাবে বাদ (Skip) পড়বে!
+      // 🛑 স্মার্ট ফিল্টারিং: যারা নতুন অ্যাপ খোলেনি বা ৩০ দিন ধরে নেই
       if (!lastActive || (now - lastActive) > THIRTY_DAYS_MS) {
         queue.push({ uid, email: u.email.trim(), name: u.name || 'Player' });
       }
     }
 
     if (queue.length === 0) {
-      return res.json({ success: false, message: 'কোনো ড্রপ-আউট বা পুরনো ইউজার পাওয়া যায়নি। সবাই বর্তমানে অ্যাক্টিভ আছে!' });
+      return res.json({ success: false, message: 'কোনো ড্রপ-আউট বা পুরনো ইউজার পাওয়া যায়নি।' });
     }
 
-    // ব্যাকগ্রাউন্ড মাল্টি-জিমেইল রোটেশন কামব্যাক ব্রডকাস্ট
     startCampaignBroadcast(queue, 'Old User Comeback', getRebrandEmailTemplate, '📢 জরুরী নোটিশ: LONE WOLF BD এখন ELITE ARENA BD!');
 
     return res.json({
       success: true,
-      message: `পুরনো প্লেয়ারদের ফিরিয়ে আনার কামব্যাক ব্রডকাস্ট শুরু হয়েছে (মোট ${queue.length} জন ড্রপ-আউট ইউজার)।`,
+      message: `কামব্যাক ব্রডকাস্ট শুরু হয়েছে (মোট ${queue.length} জন ড্রপ-আউট ইউজার)।`,
       totalOldUsers: queue.length
     });
   } catch (err) {
@@ -336,7 +353,7 @@ async function startCampaignBroadcast(queue, campaignName, templateFunc, subject
     success: 0,
     failed: 0,
     percentage: 0,
-    statusText: `${campaignName} ক্যাম্পেইন শুরু হচ্ছে...`,
+    statusText: `${campaignName} শুরু হচ্ছে...`,
     startTime: Date.now(),
     lastUpdated: Date.now()
   });
@@ -347,7 +364,6 @@ async function startCampaignBroadcast(queue, campaignName, templateFunc, subject
     let failReason = null;
 
     try {
-      // ৫টি অফার জিমেইলের মধ্যে লোড ব্যালেন্স করে পাঠানো
       await sendRotatedMail({
         to: item.email,
         subject: subject,
@@ -380,39 +396,11 @@ async function startCampaignBroadcast(queue, campaignName, templateFunc, subject
       lastUpdated: Date.now()
     });
 
-    // রেট লিমিট সেফটি (প্রতি মেইলে ৩৫০ মি.সে. ডিলে)
     await new Promise(res => setTimeout(res, 350));
   }
 
   await statusRef.update({ isRunning: false, statusText: 'Completed', endTime: Date.now() });
 }
-
-// ==========================================
-// ⏰ অটোমেটিক শুক্রবার অফার ক্রন জব (প্রতি শুক্রবার দুপুর ১২টায়)
-// ==========================================
-cron.schedule('0 12 * * 5', async () => {
-  console.log("⏰ Auto Friday Offer Triggered...");
-  try {
-    const usersSnap = await db.ref('users').once('value');
-    if (!usersSnap.exists()) return;
-    const users = usersSnap.val();
-    const queue = [];
-
-    for (const uid in users) {
-      const u = users[uid];
-      if (u.email && u.email.includes('@') && u.isBanned !== true) {
-        queue.push({ uid, email: u.email.trim(), name: u.name || 'Player' });
-      }
-    }
-
-    startCampaignBroadcast(queue, 'Auto Friday Offer', getFridayOfferEmailTemplate, '✨ পবিত্র শুক্রবার স্পেশাল ডিপোজিট বোনাস! - ELITE ARENA BD');
-  } catch (err) {
-    console.error("Friday Cron Error:", err);
-  }
-}, {
-  scheduled: true,
-  timezone: "Asia/Dhaka"
-});
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 Elite Arena Dedicated Email Service Running on Port ${PORT}`));
