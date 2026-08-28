@@ -207,7 +207,7 @@ function getRebrandEmailTemplate(userName) {
 // ==========================================
 app.get('/api/test-email', async (req, res) => {
   const targetEmail = req.query.email || 'alaminarif770@gmail.com';
-  const emailType = req.query.type || 'welcome'; // welcome, offer, comeback
+  const emailType = req.query.type || 'welcome';
 
   try {
     let subject = '🎉 [TEST] স্বাগতম! ELITE ARENA BD-তে আপনার অ্যাকাউন্ট তৈরি সম্পন্ন হয়েছে';
@@ -332,7 +332,6 @@ app.post('/api/broadcast-comeback', async (req, res) => {
 
       const lastActive = u.last_active;
 
-      // 🛑 স্মার্ট ফিল্টারিং: যারা নতুন অ্যাপ খোলেনি বা ৩০ দিন ধরে নেই
       if (!lastActive || (now - lastActive) > THIRTY_DAYS_MS) {
         queue.push({ uid, email: u.email.trim(), name: u.name || 'Player' });
       }
@@ -422,6 +421,6 @@ async function startCampaignBroadcast(queue, campaignName, templateFunc, subject
   await statusRef.update({ isRunning: false, statusText: 'Completed', endTime: Date.now() });
 }
 
-// 🟢 Railway ক্লাউড হোস্ট বাইন্ডিং (0.0.0.0)
+// 🟢 Railway ক্লাউড হোস্ট বাইন্ডিং
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Elite Arena Dedicated Email Service Running on Port ${PORT}`));
