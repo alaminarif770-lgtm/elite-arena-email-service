@@ -2,15 +2,17 @@ const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
 const cron = require('node-cron');
-const nodemailer = require('nodemailer');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+// 🟢 আপনার তৈরি করা Google Apps Script Webhook URL
+const GOOGLE_MAIL_WEBHOOK = "https://script.google.com/macros/s/AKfycbyvhaE9rtQQR1y3ato8za2aW-lHhdQvR5vzUTlPSkE5RPshT_0vjPj2e2gY-YlQBPM/exec";
+
 // 🟢 হেলথ চেক রুট
 app.get('/', (req, res) => {
-  res.status(200).send("🚀 Elite Arena Dedicated Email Microservice Active & Live!");
+  res.status(200).send("🚀 Elite Arena Google Relay Email Service Live!");
 });
 
 // ১. ফায়ারবেস সার্ভিস ইনিশিয়ালাইজেশন
@@ -24,68 +26,29 @@ try {
       credential: admin.credential.cert(serviceAccount),
       databaseURL: "https://lonewolfbd-6450b-default-rtdb.asia-southeast1.firebasedatabase.app"
     });
-    console.log("✅ Firebase Admin Connected to Email Service");
+    console.log("✅ Firebase Connected");
   }
 } catch (e) {
-  console.error("❌ Firebase Init Error:", e.message);
+  console.error("Firebase Error:", e.message);
 }
 
 const db = admin.database();
 
 // ==========================================
-// 📧 জিমেইল ট্রান্সপোর্টার ও মাল্টি-অ্যাকাউন্ট রোটেশন পুল
+// ⚡ গুগল ওয়েবহুক দিয়ে সরাসরি জিমেইল থেকে মেইল পাঠানোর মূল ফাংশন
 // ==========================================
-
-// 🎉 ১. ওয়েলকাম মেইলার (Dedicated Welcome Sender - Fast SSL)
-const welcomeTransporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.WELCOME_GMAIL || 'welcome.elitearenabd@gmail.com',
-    pass: (process.env.WELCOME_PASS || 'nyxq mxef ikin xupj').replace(/\s+/g, '')
-  },
-  tls: { rejectUnauthorized: false },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 15000
-});
-
-// 🚀 ২. অফার ও ৩,০০০+ কামব্যাক ব্রডকাস্ট রোটেশন পুল
-const offerAccountsPool = [
-  { user: 'offer.elitearenabd@gmail.com', pass: process.env.OFFER_PASS || '' },
-  { user: 'fridayoffer.elitearenabd@gmail.com', pass: process.env.FRIDAY_OFFER_PASS || '' },
-  { user: 'todayoffer.elitearenabd@gmail.com', pass: process.env.TODAY_OFFER_PASS || '' },
-  { user: 'youroffer.elitearenabd@gmail.com', pass: process.env.YOUR_OFFER_PASS || '' },
-  { user: 'user.elitearenabd@gmail.com', pass: process.env.USER_OFFER_PASS || '' }
-];
-
-// স্মার্ট রোটেশন ফাংশন (Load Balancer)
-async function sendRotatedMail(mailOptions, accountIndex = 0) {
-  const activeOfferAccounts = offerAccountsPool.filter(acc => acc.pass && acc.pass.trim() !== '');
-
-  if (activeOfferAccounts.length > 0) {
-    const selectedAcc = activeOfferAccounts[accountIndex % activeOfferAccounts.length];
-    const poolTransporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: { user: selectedAcc.user.trim(), pass: selectedAcc.pass.replace(/\s+/g, '') },
-      tls: { rejectUnauthorized: false },
-      connectionTimeout: 10000,
-      socketTimeout: 15000
-    });
-    return poolTransporter.sendMail({
-      from: `"ELITE ARENA BD" <${selectedAcc.user}>`,
-      ...mailOptions
-    });
-  } else {
-    // ফলব্যাক হিসেবে ওয়েলকাম অ্যাকাউন্ট দিয়ে পাঠানো
-    return welcomeTransporter.sendMail({
-      from: `"ELITE ARENA BD" <welcome.elitearenabd@gmail.com>`,
-      ...mailOptions
-    });
-  }
+async function sendViaGoogleRelay(to, subject, htmlContent, senderName = "ELITE ARENA BD") {
+  const response = await fetch(GOOGLE_MAIL_WEBHOOK, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({
+      to: to.trim(),
+      subject: subject,
+      html: htmlContent,
+      name: senderName
+    })
+  });
+  return await response.json();
 }
 
 // ==========================================
@@ -203,7 +166,7 @@ function getRebrandEmailTemplate(userName) {
 }
 
 // ==========================================
-// 🔍 ১-ক্লিক টেস্ট রাউট (Direct 1-Click Test API)
+// 🔍 ১-ক্লিক টেস্ট রাউট (Direct Webhook Test)
 // ==========================================
 app.get('/api/test-email', async (req, res) => {
   const targetEmail = req.query.email || 'alaminarif770@gmail.com';
@@ -225,17 +188,13 @@ app.get('/api/test-email', async (req, res) => {
       htmlContent = getRebrandEmailTemplate('Alamin Arif (Test Player)');
     }
 
-    const info = await welcomeTransporter.sendMail({
-      from: '"ELITE ARENA BD - Official" <welcome.elitearenabd@gmail.com>',
-      to: targetEmail.trim(),
-      subject: subject,
-      html: htmlContent
-    });
+    // গুগল ওয়েবহুক দিয়ে সরাসরি জিমেইল থেকে পাঠানো
+    const result = await sendViaGoogleRelay(targetEmail, subject, htmlContent, "ELITE ARENA BD");
 
     return res.json({ 
       success: true, 
       message: `টেস্ট ${emailType.toUpperCase()} ইমেইল সফলভাবে পাঠানো হয়েছে ${targetEmail} ঠিকানায়!`,
-      messageId: info.messageId 
+      googleResponse: result 
     });
   } catch (err) {
     console.error("Test Email Error:", err);
@@ -259,16 +218,16 @@ db.ref('users').on('child_added', async (snapshot) => {
       const joinedTime = user.joinedAt ? new Date(user.joinedAt).getTime() : now;
 
       if ((now - joinedTime) < 2 * 60 * 60 * 1000) {
-        await welcomeTransporter.sendMail({
-          from: '"ELITE ARENA BD - Official" <welcome.elitearenabd@gmail.com>',
-          to: user.email,
-          subject: '🎉 স্বাগতম! ELITE ARENA BD-তে আপনার অ্যাকাউন্ট তৈরি সম্পন্ন হয়েছে',
-          html: getWelcomeEmailTemplate({
+        await sendViaGoogleRelay(
+          user.email,
+          '🎉 স্বাগতম! ELITE ARENA BD-তে আপনার অ্যাকাউন্ট তৈরি সম্পন্ন হয়েছে',
+          getWelcomeEmailTemplate({
             name: user.name || 'Player',
             supportPin: user.supportPin || 'N/A',
             email: user.email
-          })
-        });
+          }),
+          "ELITE ARENA BD - Official"
+        );
 
         await db.ref(`welcome_email_logs/${uid}`).set({ sentAt: now });
         console.log(`✅ [Auto-Welcome] Sent to new user: ${user.email}`);
@@ -354,7 +313,7 @@ app.post('/api/broadcast-comeback', async (req, res) => {
 });
 
 // ==========================================
-// ⚙️ ব্যাকগ্রাউন্ড মাল্টি-জিমেইল রোটেশন ইঞ্জিন
+// ⚙️ ব্যাকগ্রাউন্ড ব্রডকাস্ট ইঞ্জিন
 // ==========================================
 async function startCampaignBroadcast(queue, campaignName, templateFunc, subject) {
   const total = queue.length;
@@ -383,17 +342,12 @@ async function startCampaignBroadcast(queue, campaignName, templateFunc, subject
     let failReason = null;
 
     try {
-      await sendRotatedMail({
-        to: item.email,
-        subject: subject,
-        html: templateFunc(item.name)
-      }, i);
-
+      await sendViaGoogleRelay(item.email, subject, templateFunc(item.name), "ELITE ARENA BD");
       isSuccess = true;
       successCount++;
     } catch (err) {
       isSuccess = false;
-      failReason = err.message || 'SMTP Error';
+      failReason = err.message || 'Relay Error';
       failCount++;
     }
 
@@ -415,12 +369,12 @@ async function startCampaignBroadcast(queue, campaignName, templateFunc, subject
       lastUpdated: Date.now()
     });
 
-    await new Promise(res => setTimeout(res, 350));
+    await new Promise(res => setTimeout(res, 400));
   }
 
   await statusRef.update({ isRunning: false, statusText: 'Completed', endTime: Date.now() });
 }
 
-// 🟢 Railway ক্লাউড হোস্ট বাইন্ডিং
+// 🟢 ক্লাউড হোস্ট বাইন্ডিং
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Elite Arena Dedicated Email Service Running on Port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Elite Arena Google Relay Email Service Running on Port ${PORT}`));
