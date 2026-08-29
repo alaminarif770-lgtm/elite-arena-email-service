@@ -53,7 +53,7 @@ async function sendViaGoogleRelay(to, subject, htmlContent, plainText = "", send
 }
 
 // ==========================================
-// 🎨 ১. নতুন ইউজার ওয়েলকাম ইমেইল টেমপ্লেট
+// 🎨 ১. নতুন ইউজার ওয়েলকাম ইমেইল টেমপ্লেট (আপনার দেওয়া নতুন প্রিমিয়াম ডিজাইন)
 // ==========================================
 function getWelcomeEmailTemplate(data) {
   const name = data.name || 'Player';
@@ -62,39 +62,122 @@ function getWelcomeEmailTemplate(data) {
 
   return `
 <!DOCTYPE html>
-<html lang="bn"><head><meta charset="UTF-8"><title>Welcome</title></head>
-<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: sans-serif;">
-  <table width="100%" style="padding: 35px 12px;"><tr><td align="center">
-    <table width="100%" style="max-width: 500px; background-color: #ffffff; border-radius: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; overflow: hidden;">
-      <tr><td style="background: linear-gradient(90deg, #ff003c 0%, #ff3366 100%); height: 5px;"></td></tr>
-      <tr><td align="center" style="padding: 35px 25px 12px 25px;">
-        <img src="https://elitearena.live/favicon.png" width="62" height="62" style="border-radius: 15px; box-shadow: 0 6px 20px rgba(255,0,60,0.2);">
-        <div style="margin-top: 12px; color: #0f172a; font-size: 16px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;">ELITE ARENA BD</div>
-        <div style="font-size: 11px; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-top: 2px;">Official Esports Platform</div>
-      </td></tr>
-      <tr><td style="padding: 10px 28px 30px 28px; text-align: left;">
-        <div style="background-color: #fff1f2; border: 1px solid #ffe4e6; border-radius: 50px; padding: 4px 14px; display: inline-block; margin-bottom: 12px;">
-          <span style="color: #ff003c; font-size: 11px; font-weight: 800; text-transform: uppercase;">✦ Welcome to the Arena</span>
-        </div>
-        <h1 style="color: #0f172a; font-size: 22px; font-weight: 800; margin: 0 0 10px 0;">স্বাগতম আমাদের অ্যারেনায়,<br><span style="color: #ff003c;">${name}</span>!</h1>
-        <p style="color: #475569; font-size: 14px; line-height: 1.65; margin: 0 0 20px 0;">বাংলাদেশের বিশ্বস্ত এস্পোর্টস প্ল্যাটফর্ম <strong>ELITE ARENA BD</strong>-তে আপনার অ্যাকাউন্ট সফলভাবে সক্রিয় করা হয়েছে।</p>
-        <table width="100%" style="background-color: #f8fafc; border: 1.5px solid #edf2f7; border-radius: 14px; margin-bottom: 22px;">
-          <tr><td style="padding: 12px 16px; border-bottom: 1px solid #edf2f7; font-size: 13px; color: #64748b;">রেজিস্টার্ড ইমেইল <strong style="color: #0f172a; float: right;">${email}</strong></td></tr>
-          <tr><td style="padding: 12px 16px; font-size: 13px; color: #64748b;">সিকিউর সাপোর্ট পিন <strong style="color: #ff003c; float: right; font-size: 15px; font-weight: 800;">#${supportPin}</strong></td></tr>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to ELITE ARENA BD</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; height: auto; outline: none; text-decoration: none; }
+    body { margin: 0; padding: 0; width: 100% !important; background-color: #F8F9FA; font-family: 'Hind Siliguri', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #F8F9FA;">
+
+  <!-- প্রি-হেডার -->
+  <div style="display: none; font-size: 1px; color: #F8F9FA; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
+    ELITE ARENA BD-তে স্বাগতম। আপনার অ্যাকাউন্ট সম্পূর্ণ তৈরি।
+  </div>
+
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #F8F9FA; padding: 48px 16px;">
+    <tr>
+      <td align="center">
+        
+        <!-- মূল কার্ড -->
+        <table role="presentation" width="100%" style="max-width: 480px; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #EAEAEA; overflow: hidden; text-align: center;">
+          
+          <!-- হেডার / ব্র্যান্ড লোগো -->
+          <tr>
+            <td align="center" style="padding: 40px 32px 24px 32px;">
+              <img src="https://elitearena.live/favicon.png" alt="ELITE ARENA BD" width="48" height="48" style="display: block; border-radius: 10px; margin-bottom: 16px;">
+              <div style="font-size: 13px; font-weight: 800; color: #111827; letter-spacing: 2px; text-transform: uppercase; font-family: 'Plus Jakarta Sans', sans-serif;">
+                ELITE ARENA <span style="color: #E50914;">BD</span>
+              </div>
+            </td>
+          </tr>
+
+          <!-- মেইন কনটেন্ট -->
+          <tr>
+            <td style="padding: 0 36px 36px 36px;">
+              
+              <!-- প্রধান শিরোনাম -->
+              <h1 style="color: #111827; font-size: 24px; font-weight: 700; margin: 0 0 12px 0; line-height: 1.35;">
+                স্বাগতম, <span style="color: #E50914;">${name}</span>!
+              </h1>
+              
+              <p style="color: #6B7280; font-size: 15px; line-height: 1.6; margin: 0 0 28px 0;">
+                আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে। দেশের শীর্ষ টুর্নামেন্টগুলোতে অংশগ্রহণ করতে আপনি এখন সম্পূর্ণ প্রস্তুত।
+              </p>
+
+              <!-- প্রাইমারি কল-টু-অ্যাকশন বাটন -->
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-bottom: 30px;">
+                <tr>
+                  <td align="center">
+                    <a href="https://elitearena.live" target="_blank" style="display: block; width: 100%; max-width: 280px; background-color: #E50914; color: #FFFFFF; text-decoration: none; font-size: 15px; font-weight: 700; padding: 14px 20px; border-radius: 8px; box-sizing: border-box;">
+                      খেলা শুরু করুন
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- ডিভাইডার -->
+              <div style="border-top: 1px solid #F3F4F6; margin-bottom: 24px;"></div>
+
+              <!-- সংক্ষিপ্ত অ্যাকাউন্ট ইনফো (মিনিমাল লুক) -->
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #FAFAFA; border-radius: 10px; padding: 14px 18px; margin-bottom: 24px; text-align: left;">
+                <tr>
+                  <td style="font-size: 13px; color: #6B7280;">
+                    ইমেইল: <strong style="color: #111827;">${email}</strong>
+                  </td>
+                  <td align="right" style="font-size: 13px; color: #6B7280;">
+                    পিন: <strong style="color: #E50914; font-family: 'Plus Jakarta Sans', sans-serif;">#${supportPin}</strong>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- ফিচার হাইলাইটস (সিম্পল ৩ লাইন) -->
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="text-align: left; font-size: 13.5px; color: #4B5563; line-height: 1.5;">
+                <tr>
+                  <td style="padding-bottom: 12px; vertical-align: top; width: 24px; color: #E50914; font-weight: bold;">✓</td>
+                  <td style="padding-bottom: 12px;"><strong>স্লট বুক করুন:</strong> পছন্দের Solo বা Squad ম্যাচ বেছে নিন।</td>
+                </tr>
+                <tr>
+                  <td style="padding-bottom: 12px; vertical-align: top; width: 24px; color: #E50914; font-weight: bold;">✓</td>
+                  <td style="padding-bottom: 12px;"><strong>রুম অ্যাক্সেস:</strong> ম্যাচ শুরুর আগে অ্যাপেই পাবেন আইডি ও পাসওয়ার্ড।</td>
+                </tr>
+                <tr>
+                  <td style="vertical-align: top; width: 24px; color: #E50914; font-weight: bold;">✓</td>
+                  <td><strong>ইনস্ট্যান্ট ক্যাশআউট:</strong> সরাসরি বিকাশ ও নগদে প্রাইজমানি গ্রহণ করুন।</td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- ফুটার -->
+          <tr>
+            <td style="background-color: #FAFAFA; border-top: 1px solid #F3F4F6; padding: 20px 24px; text-align: center;">
+              <p style="color: #9CA3AF; font-size: 12px; margin: 0 0 4px 0;">
+                © 2026 ELITE ARENA BD. All rights reserved.
+              </p>
+              <p style="color: #9CA3AF; font-size: 11.5px; margin: 0;">
+                <a href="https://elitearena.live" target="_blank" style="color: #6B7280; text-decoration: none;">elitearena.live</a>
+              </p>
+            </td>
+          </tr>
+
         </table>
-        <div style="font-size: 12.5px; font-weight: 800; color: #0f172a; margin-bottom: 12px; text-transform: uppercase;">যেভাবে খেলা শুরু করবেন:</div>
-        <table width="100%" style="margin-bottom: 15px; font-size: 13px; color: #475569; line-height: 1.5;">
-          <tr><td style="padding: 6px 0;"><strong>০১. ম্যাচ সিলেক্ট:</strong> Solo, Duo বা Squad ম্যাচ বুক করুন।</td></tr>
-          <tr><td style="padding: 6px 0;"><strong>০২. রুম ডিটেইলস:</strong> ম্যাচ শুরুর ৫-১০ মিনিট আগে অ্যাপে রুম আইডি-পাসওয়ার্ড পাবেন।</td></tr>
-          <tr><td style="padding: 6px 0;"><strong>০৩. ইনস্ট্যান্ট উইথড্র:</strong> বিকাশ/নগদে যেকোনো সময় টাকা ক্যাশআউট করুন।</td></tr>
-        </table>
-      </td></tr>
-      <tr><td style="padding: 18px 25px; background-color: #fafbfc; border-top: 1px solid #f1f5f9; text-align: center; font-size: 11.5px; color: #94a3b8;">
-        © 2026 ELITE ARENA BD • <a href="https://elitearena.live" target="_blank" style="color: #ff003c; text-decoration: none; font-weight: 600;">elitearena.live</a>
-      </td></tr>
-    </table>
-  </td></tr></table>
-</body></html>`;
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
+  `;
 }
 
 // ==========================================
@@ -303,7 +386,6 @@ app.post('/api/broadcast-comeback', async (req, res) => {
 
       const lastActive = u.last_active;
 
-      // 🛑 স্মার্ট ফিল্টারিং: যারা নতুন অ্যাপ খোলেনি বা ৩০ দিন ধরে নেই
       if (!lastActive || (now - lastActive) > THIRTY_DAYS_MS) {
         queue.push({ uid, email: u.email.trim(), name: u.name || 'Player' });
       }
