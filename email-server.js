@@ -11,18 +11,18 @@ app.use(express.json());
 // 🔗 আপনার ৭টি সম্পূর্ণ সক্রিয় Google Webhooks
 // ==========================================
 const ALL_7_WEBHOOKS = [
-  { name: "security", url: "https://script.google.com/macros/s/AKfycbw19a3YdP6tregoB-IsHPrWXZhLRki93cWxKJ2x8WiRJ6TUNETh0y-5IJcOzc_AFamltg/exec" },
-  { name: "welcome", url: "https://script.google.com/macros/s/AKfycbyvhaE9rtQQR1y3ato8za2aW-lHhdQvR5vzUTlPSkE5RPshT_0vjPj2e2gY-YlQBPM/exec" },
-  { name: "offer", url: "https://script.google.com/macros/s/AKfycbyDtu-QHB6ZjXOeitPGB9VMyZEuZinjqllA9Whq1DGlnJsrE1inBVGnLjYcysBviHxI/exec" },
-  { name: "fridayoffer", url: "https://script.google.com/macros/s/AKfycbxd8sjApooKE3Q3-Jcvy4pQh1GpJVTjGmtzSbm6B9p46WRwZycKn82FdDllH19dBucMDg/exec" },
-  { name: "todayoffer", url: "https://script.google.com/macros/s/AKfycbw8i45zrFh9KF9sHAkAxGY6_H8Ea4HC0e0nD40EL26zNdyAYsetp7FmCdx0fyF5-bvt/exec" },
-  { name: "youroffer", url: "https://script.google.com/macros/s/AKfycbzQSNMW6lU0wJqK7gBvfHdzysoxKU1ZZau0sq-Sg73kz06DlssXgHT_8cWs4uNsxdpeNg/exec" },
-  { name: "user", url: "https://script.google.com/macros/s/AKfycbz7rFGxRCu3avkRjpDsw3iKnjg38Yes7c1EafWdVXgCdgEsIdDxSEgpjo4brDVS2YvIfw/exec" }
+  { name: "security", email: "security.elitearenabd@gmail.com", url: "https://script.google.com/macros/s/AKfycbw19a3YdP6tregoB-IsHPrWXZhLRki93cWxKJ2x8WiRJ6TUNETh0y-5IJcOzc_AFamltg/exec" },
+  { name: "welcome", email: "welcome.elitearenabd@gmail.com", url: "https://script.google.com/macros/s/AKfycbyvhaE9rtQQR1y3ato8za2aW-lHhdQvR5vzUTlPSkE5RPshT_0vjPj2e2gY-YlQBPM/exec" },
+  { name: "offer", email: "offer.elitearenabd@gmail.com", url: "https://script.google.com/macros/s/AKfycbyDtu-QHB6ZjXOeitPGB9VMyZEuZinjqllA9Whq1DGlnJsrE1inBVGnLjYcysBviHxI/exec" },
+  { name: "fridayoffer", email: "fridayoffer.elitearenabd@gmail.com", url: "https://script.google.com/macros/s/AKfycbxd8sjApooKE3Q3-Jcvy4pQh1GpJVTjGmtzSbm6B9p46WRwZycKn82FdDllH19dBucMDg/exec" },
+  { name: "todayoffer", email: "todayoffer.elitearenabd@gmail.com", url: "https://script.google.com/macros/s/AKfycbw8i45zrFh9KF9sHAkAxGY6_H8Ea4HC0e0nD40EL26zNdyAYsetp7FmCdx0fyF5-bvt/exec" },
+  { name: "youroffer", email: "youroffer.elitearenabd@gmail.com", url: "https://script.google.com/macros/s/AKfycbzQSNMW6lU0wJqK7gBvfHdzysoxKU1ZZau0sq-Sg73kz06DlssXgHT_8cWs4uNsxdpeNg/exec" },
+  { name: "user", email: "user.elitearenabd@gmail.com", url: "https://script.google.com/macros/s/AKfycbz7rFGxRCu3avkRjpDsw3iKnjg38Yes7c1EafWdVXgCdgEsIdDxSEgpjo4brDVS2YvIfw/exec" }
 ];
 
 // 🟢 হেলথ চেক রুট
 app.get('/', (req, res) => {
-  res.status(200).send("🚀 Elite Arena Dedicated Email Microservice Live & Active!");
+  res.status(200).send("🚀 Elite Arena 7-Gmail Enterprise Email Microservice Live & Active!");
 });
 
 // ১. ফায়ারবেস সার্ভিস ইনিশিয়ালাইজেশন
@@ -36,7 +36,7 @@ try {
       credential: admin.credential.cert(serviceAccount),
       databaseURL: "https://lonewolfbd-6450b-default-rtdb.asia-southeast1.firebasedatabase.app"
     });
-    console.log("✅ Firebase Connected to Email Service");
+    console.log("✅ Firebase Connected to 7-Gmail Email Service");
   }
 } catch (e) {
   console.error("Firebase Error:", e.message);
@@ -63,7 +63,7 @@ async function sendViaWebhook(webhookUrl, to, subject, htmlContent, plainText = 
 }
 
 // ==========================================
-// 🎨 ১. নতুন ইউজার ওয়েলকাম ইমেইল টেমপ্লেট (আপনার দেওয়া ফাইনাল মিনিমাল ডিজাইন)
+// 🎨 ১. নতুন ইউজার ওয়েলকাম ইমেইল টেমপ্লেট
 // ==========================================
 function getWelcomeEmailTemplate(data) {
   const name = data.name || 'Player';
@@ -86,90 +86,50 @@ function getWelcomeEmailTemplate(data) {
   </style>
 </head>
 <body style="margin: 0; padding: 0; background-color: #F8F9FA;">
-
   <div style="display: none; font-size: 1px; color: #F8F9FA; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
     ELITE ARENA BD-তে স্বাগতম। আপনার অ্যাকাউন্ট সম্পূর্ণ তৈরি।
   </div>
-
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #F8F9FA; padding: 48px 16px;">
-    <tr>
-      <td align="center">
-        
-        <table role="presentation" width="100%" style="max-width: 480px; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #EAEAEA; overflow: hidden; text-align: center;">
-          
-          <tr>
-            <td align="center" style="padding: 40px 32px 20px 32px;">
-              <img src="https://elitearena.live/favicon.png" alt="ELITE ARENA BD" width="48" height="48" style="display: block; border-radius: 10px; margin-bottom: 16px;">
-              <div style="font-size: 13px; font-weight: 800; color: #111827; letter-spacing: 2px; text-transform: uppercase; font-family: 'Plus Jakarta Sans', sans-serif;">
-                ELITE ARENA <span style="color: #E50914;">BD</span>
-              </div>
-            </td>
-          </tr>
-
-          <tr>
-            <td style="padding: 0 36px 36px 36px;">
-              
-              <h1 style="color: #111827; font-size: 24px; font-weight: 700; margin: 0 0 12px 0; line-height: 1.35;">
-                স্বাগতম, <span style="color: #E50914;">${name}</span>!
-              </h1>
-              
-              <p style="color: #6B7280; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
-                আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে। দেশের শীর্ষ টুর্নামেন্টগুলোতে অংশগ্রহণ করতে আপনি এখন সম্পূর্ণ প্রস্তুত।
-              </p>
-
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #FAFAFA; border: 1px solid #F1F5F9; border-radius: 12px; margin-bottom: 26px; text-align: left;">
-                <tr>
-                  <td style="padding: 13px 18px; border-bottom: 1px solid #EDEDED; font-size: 13.5px;">
-                    <span style="color: #6B7280;">ইমেইল:</span>
-                    <strong style="color: #111827; float: right; font-weight: 600;">${email}</strong>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding: 13px 18px; font-size: 13.5px;">
-                    <span style="color: #6B7280;">সাপোর্ট পিন:</span>
-                    <strong style="color: #E50914; float: right; font-weight: 800; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14.5px; letter-spacing: 0.5px;">#${supportPin}</strong>
-                  </td>
-                </tr>
-              </table>
-
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="text-align: left; font-size: 13.5px; color: #4B5563; line-height: 1.5;">
-                <tr>
-                  <td style="padding-bottom: 12px; vertical-align: top; width: 24px; color: #E50914; font-weight: bold;">✓</td>
-                  <td style="padding-bottom: 12px;"><strong>স্লট বুক করুন:</strong> পছন্দের Solo বা Squad ম্যাচ বেছে নিন।</td>
-                </tr>
-                <tr>
-                  <td style="padding-bottom: 12px; vertical-align: top; width: 24px; color: #E50914; font-weight: bold;">✓</td>
-                  <td style="padding-bottom: 12px;"><strong>রুম অ্যাক্সেস:</strong> ম্যাচ শুরুর আগে অ্যাপেই পাবেন আইডি ও পাসওয়ার্ড।</td>
-                </tr>
-                <tr>
-                  <td style="vertical-align: top; width: 24px; color: #E50914; font-weight: bold;">✓</td>
-                  <td><strong>ইনস্ট্যান্ট ক্যাশআউট:</strong> সরাসরি বিকাশ ও নগদে প্রাইজমানি গ্রহণ করুন।</td>
-                </tr>
-              </table>
-
-            </td>
-          </tr>
-
-          <tr>
-            <td style="background-color: #FAFAFA; border-top: 1px solid #F3F4F6; padding: 20px 24px; text-align: center;">
-              <p style="color: #9CA3AF; font-size: 12px; margin: 0 0 4px 0;">
-                © 2026 ELITE ARENA BD. All rights reserved.
-              </p>
-              <p style="color: #9CA3AF; font-size: 11.5px; margin: 0;">
-                <a href="https://elitearena.live" target="_blank" style="color: #6B7280; text-decoration: none;">elitearena.live</a>
-              </p>
-            </td>
-          </tr>
-
-        </table>
-
-      </td>
-    </tr>
+    <tr><td align="center">
+      <table role="presentation" width="100%" style="max-width: 480px; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #EAEAEA; overflow: hidden; text-align: center;">
+        <tr><td align="center" style="padding: 40px 32px 20px 32px;">
+          <img src="https://elitearena.live/favicon.png" alt="ELITE ARENA BD" width="48" height="48" style="display: block; border-radius: 10px; margin-bottom: 16px;">
+          <div style="font-size: 13px; font-weight: 800; color: #111827; letter-spacing: 2px; text-transform: uppercase; font-family: 'Plus Jakarta Sans', sans-serif;">
+            ELITE ARENA <span style="color: #E50914;">BD</span>
+          </div>
+        </td></tr>
+        <tr><td style="padding: 0 36px 36px 36px;">
+          <h1 style="color: #111827; font-size: 24px; font-weight: 700; margin: 0 0 12px 0; line-height: 1.35;">
+            স্বাগতম, <span style="color: #E50914;">${name}</span>!
+          </h1>
+          <p style="color: #6B7280; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+            আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে। দেশের শীর্ষ টুর্নামেন্টগুলোতে অংশগ্রহণ করতে আপনি এখন সম্পূর্ণ প্রস্তুত।
+          </p>
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #FAFAFA; border: 1px solid #F1F5F9; border-radius: 12px; margin-bottom: 26px; text-align: left;">
+            <tr><td style="padding: 13px 18px; border-bottom: 1px solid #EDEDED; font-size: 13.5px;">
+              <span style="color: #6B7280;">ইমেইল:</span>
+              <strong style="color: #111827; float: right; font-weight: 600;">${email}</strong>
+            </td></tr>
+            <tr><td style="padding: 13px 18px; font-size: 13.5px;">
+              <span style="color: #6B7280;">সাপোর্ট পিন:</span>
+              <strong style="color: #E50914; float: right; font-weight: 800; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14.5px; letter-spacing: 0.5px;">#${supportPin}</strong>
+            </td></tr>
+          </table>
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="text-align: left; font-size: 13.5px; color: #4B5563; line-height: 1.5;">
+            <tr><td style="padding-bottom: 12px; vertical-align: top; width: 24px; color: #E50914; font-weight: bold;">✓</td><td style="padding-bottom: 12px;"><strong>স্লট বুক করুন:</strong> পছন্দের Solo বা Squad ম্যাচ বেছে নিন।</td></tr>
+            <tr><td style="padding-bottom: 12px; vertical-align: top; width: 24px; color: #E50914; font-weight: bold;">✓</td><td style="padding-bottom: 12px;"><strong>রুম অ্যাক্সেস:</strong> ম্যাচ শুরুর আগে অ্যাপেই পাবেন আইডি ও পাসওয়ার্ড।</td></tr>
+            <tr><td style="vertical-align: top; width: 24px; color: #E50914; font-weight: bold;">✓</td><td><strong>ইনস্ট্যান্ট ক্যাশআউট:</strong> সরাসরি বিকাশ ও নগদে প্রাইজমানি গ্রহণ করুন।</td></tr>
+          </table>
+        </td></tr>
+        <tr><td style="background-color: #FAFAFA; border-top: 1px solid #F3F4F6; padding: 20px 24px; text-align: center;">
+          <p style="color: #9CA3AF; font-size: 12px; margin: 0 0 4px 0;">© 2026 ELITE ARENA BD. All rights reserved.</p>
+          <p style="color: #9CA3AF; font-size: 11.5px; margin: 0;"><a href="https://elitearena.live" target="_blank" style="color: #6B7280; text-decoration: none;">elitearena.live</a></p>
+        </td></tr>
+      </table>
+    </td></tr>
   </table>
-
 </body>
-</html>
-  `;
+</html>`;
 }
 
 // ==========================================
@@ -242,47 +202,81 @@ function getRebrandEmailTemplate(userName) {
 }
 
 // ==========================================
-// 🔍 ১-ক্লিক টেস্ট রাউট
+// 🔍 ১. নির্দিষ্ট যেকোনো ১টি অ্যাকাউন্ট টেস্ট করার রুট
 // ==========================================
 app.get('/api/test-email', async (req, res) => {
   const targetEmail = req.query.email || 'alaminarif770@gmail.com';
-  const emailType = req.query.type || 'welcome';
+  const accountName = (req.query.account || 'welcome').toLowerCase(); // security, welcome, offer, fridayoffer, todayoffer, youroffer, user
+
+  const targetAccount = ALL_7_WEBHOOKS.find(acc => acc.name === accountName) || ALL_7_WEBHOOKS[1];
 
   try {
-    let subject = 'স্বাগতম! ELITE ARENA BD-তে আপনার অ্যাকাউন্ট তৈরি সম্পন্ন হয়েছে';
-    let plainText = 'স্বাগতম! ELITE ARENA BD-তে আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে।';
+    let subject = `স্বাগতম! ELITE ARENA BD-তে আপনার অ্যাকাউন্ট তৈরি সম্পন্ন হয়েছে (${targetAccount.name})`;
+    let plainText = `স্বাগতম! ELITE ARENA BD-তে আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে। (${targetAccount.email})`;
     let htmlContent = getWelcomeEmailTemplate({
       name: 'Alamin Arif',
       supportPin: '7842',
       email: targetEmail
     });
 
-    if (emailType === 'offer') {
-      subject = 'পবিত্র শুক্রবার স্পেশাল ডিপোজিট বোনাস! - ELITE ARENA BD';
-      plainText = 'পবিত্র শুক্রবার স্পেশাল ডিপোজিট বোনাস অফার! আজই ডিপোজিট করুন এবং আকর্ষণীয় বোনাস উপভোগ করুন।';
+    if (accountName.includes('offer')) {
+      subject = `পবিত্র শুক্রবার স্পেশাল ডিপোজিট বোনাস! - ELITE ARENA BD (${targetAccount.name})`;
+      plainText = 'পবিত্র শুক্রবার স্পেশাল ডিপোজিট বোনাস অফার! আজই ডিপোজিট করুন।';
       htmlContent = getFridayOfferEmailTemplate('Alamin Arif');
-    } else if (emailType === 'comeback') {
-      subject = 'জরুরী নোটিশ: LONE WOLF BD এখন ELITE ARENA BD!';
+    } else if (accountName === 'user') {
+      subject = `জরুরী নোটিশ: LONE WOLF BD এখন ELITE ARENA BD! (${targetAccount.name})`;
       plainText = 'জরুরী নোটিশ: LONE WOLF BD এর নাম পরিবর্তন করে ELITE ARENA BD করা হয়েছে।';
       htmlContent = getRebrandEmailTemplate('Alamin Arif');
     }
 
-    const selectedWebhook = ALL_7_WEBHOOKS[1].url; // welcome webhook
-    const result = await sendViaWebhook(selectedWebhook, targetEmail, subject, htmlContent, plainText, "ELITE ARENA BD");
+    const result = await sendViaWebhook(targetAccount.url, targetEmail, subject, htmlContent, plainText, `ELITE ARENA BD - ${targetAccount.name}`);
 
     return res.json({ 
       success: true, 
-      message: `টেস্ট ${emailType.toUpperCase()} ইমেইল সফলভাবে পাঠানো হয়েছে ${targetEmail} ঠিকানায়!`,
+      accountUsed: targetAccount.name,
+      senderEmail: targetAccount.email,
+      message: `টেস্ট মেইল সফলভাবে পাঠানো হয়েছে ${targetAccount.email} থেকে!`,
       googleResponse: result 
     });
   } catch (err) {
-    console.error("Test Email Error:", err);
-    return res.status(500).json({ success: false, message: 'ইমেইল পাঠাতে ব্যর্থ!', error: err.message });
+    return res.status(500).json({ success: false, account: targetAccount.name, error: err.message });
   }
 });
 
 // ==========================================
-// 🤖 ১. স্বয়ংক্রিয় রিয়েলটাইম ওয়েলকাম ইমেইল লিসেনার
+// ⚡ ২. এক ক্লিকে সব ৭টি অ্যাকাউন্ট একসাথে টেস্ট করার মাস্টার রুট
+// ==========================================
+app.get('/api/test-all-accounts', async (req, res) => {
+  const targetEmail = req.query.email || 'alaminarif770@gmail.com';
+  const results = [];
+
+  for (let i = 0; i < ALL_7_WEBHOOKS.length; i++) {
+    const acc = ALL_7_WEBHOOKS[i];
+    try {
+      const resGoogle = await sendViaWebhook(
+        acc.url,
+        targetEmail,
+        `[TEST] ${acc.name} জিমেইল থেকে টেস্ট ইমেইল (${acc.email})`,
+        `<div style="font-family:sans-serif;padding:25px;text-align:center;border:1px solid #e2e8f0;border-radius:12px;"><h2 style="color:#10b981;">✅ ${acc.name} একাউন্ট ১০০% সফলভাবে কাজ করছে!</h2><p style="color:#475569;">প্রেরক জিমেইল: <b>${acc.email}</b></p></div>`,
+        `${acc.name} একাউন্ট (${acc.email}) সফলভাবে কাজ করছে!`,
+        `ELITE ARENA - ${acc.name}`
+      );
+      results.push({ account: acc.name, email: acc.email, status: "success", response: resGoogle });
+    } catch (err) {
+      results.push({ account: acc.name, email: acc.email, status: "failed", error: err.message });
+    }
+    await new Promise(r => setTimeout(r, 400));
+  }
+
+  return res.json({
+    success: true,
+    message: `সকল ৭টি জিমেইল অ্যাকাউন্টের টেস্ট সফলভাবে সম্পন্ন হয়েছে! আপনার ইনবক্স চেক করুন।`,
+    testedAccounts: results
+  });
+});
+
+// ==========================================
+// 🤖 ৩. স্বয়ংক্রিয় রিয়েলটাইম ওয়েলকাম ইমেইল লিসেনার
 // ==========================================
 db.ref('users').on('child_added', async (snapshot) => {
   try {
@@ -296,7 +290,6 @@ db.ref('users').on('child_added', async (snapshot) => {
       const now = Date.now();
       const joinedTime = user.joinedAt ? new Date(user.joinedAt).getTime() : now;
 
-      // শুধুমাত্র গত ২ ঘণ্টার মধ্যে জয়েন করা নতুন ইউজারকে পাঠাবে
       if ((now - joinedTime) < 2 * 60 * 60 * 1000) {
         const welcomeWebhook = ALL_7_WEBHOOKS.find(w => w.name === "welcome") || ALL_7_WEBHOOKS[1];
         await sendViaWebhook(
@@ -322,7 +315,7 @@ db.ref('users').on('child_added', async (snapshot) => {
 });
 
 // ==========================================
-// 🚀 ২. সবার জন্য অফার ব্রডকাস্ট API (৭টি জিমেইলে লোড ব্যালেন্স)
+// 🚀 ৪. সবার জন্য অফার ব্রডকাস্ট API
 // ==========================================
 app.post('/api/broadcast-offer', async (req, res) => {
   try {
@@ -360,7 +353,7 @@ app.post('/api/broadcast-offer', async (req, res) => {
 });
 
 // ==========================================
-// 🎯 ৩. পুরনো ও ড্রপ-আউট ইউজারদের কামব্যাক ব্রডকাস্ট API (স্মার্ট ফিল্টার্ড)
+// 🎯 ৫. পুরনো ও ড্রপ-আউট ইউজারদের কামব্যাক ব্রডকাস্ট API (স্মার্ট ফিল্টার্ড)
 // ==========================================
 app.post('/api/broadcast-comeback', async (req, res) => {
   try {
@@ -380,7 +373,6 @@ app.post('/api/broadcast-comeback', async (req, res) => {
 
       const lastActive = u.last_active;
 
-      // 🛑 স্মার্ট ফিল্টারিং: যারা নতুন অ্যাপ এখনও একবারও খোলেনি বা ৩০ দিন ধরে নেই
       if (!lastActive || (now - lastActive) > THIRTY_DAYS_MS) {
         queue.push({ uid, email: u.email.trim(), name: u.name || 'Player' });
       }
