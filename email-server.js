@@ -7,12 +7,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 🟢 আপনার তৈরি করা Google Apps Script Webhook URL
-const GOOGLE_MAIL_WEBHOOK = "https://script.google.com/macros/s/AKfycbyvhaE9rtQQR1y3ato8za2aW-lHhdQvR5vzUTlPSkE5RPshT_0vjPj2e2gY-YlQBPM/exec";
+// ==========================================
+// 🔗 আপনার ৭টি সম্পূর্ণ সক্রিয় Google Webhooks
+// ==========================================
+const ALL_7_WEBHOOKS = [
+  { name: "security", url: "https://script.google.com/macros/s/AKfycbw19a3YdP6tregoB-IsHPrWXZhLRki93cWxKJ2x8WiRJ6TUNETh0y-5IJcOzc_AFamltg/exec" },
+  { name: "welcome", url: "https://script.google.com/macros/s/AKfycbyvhaE9rtQQR1y3ato8za2aW-lHhdQvR5vzUTlPSkE5RPshT_0vjPj2e2gY-YlQBPM/exec" },
+  { name: "offer", url: "https://script.google.com/macros/s/AKfycbyDtu-QHB6ZjXOeitPGB9VMyZEuZinjqllA9Whq1DGlnJsrE1inBVGnLjYcysBviHxI/exec" },
+  { name: "fridayoffer", url: "https://script.google.com/macros/s/AKfycbxd8sjApooKE3Q3-Jcvy4pQh1GpJVTjGmtzSbm6B9p46WRwZycKn82FdDllH19dBucMDg/exec" },
+  { name: "todayoffer", url: "https://script.google.com/macros/s/AKfycbw8i45zrFh9KF9sHAkAxGY6_H8Ea4HC0e0nD40EL26zNdyAYsetp7FmCdx0fyF5-bvt/exec" },
+  { name: "youroffer", url: "https://script.google.com/macros/s/AKfycbzQSNMW6lU0wJqK7gBvfHdzysoxKU1ZZau0sq-Sg73kz06DlssXgHT_8cWs4uNsxdpeNg/exec" },
+  { name: "user", url: "https://script.google.com/macros/s/AKfycbz7rFGxRCu3avkRjpDsw3iKnjg38Yes7c1EafWdVXgCdgEsIdDxSEgpjo4brDVS2YvIfw/exec" }
+];
 
 // 🟢 হেলথ চেক রুট
 app.get('/', (req, res) => {
-  res.status(200).send("🚀 Elite Arena Google Relay Email Service Live!");
+  res.status(200).send("🚀 Elite Arena Dedicated Email Microservice Live & Active!");
 });
 
 // ১. ফায়ারবেস সার্ভিস ইনিশিয়ালাইজেশন
@@ -37,15 +47,15 @@ const db = admin.database();
 // ==========================================
 // ⚡ গুগল রিলে দিয়ে অ্যান্টি-স্প্যাম মেইল পাঠানোর মূল ফাংশন
 // ==========================================
-async function sendViaGoogleRelay(to, subject, htmlContent, plainText = "", senderName = "ELITE ARENA BD") {
-  const response = await fetch(GOOGLE_MAIL_WEBHOOK, {
+async function sendViaWebhook(webhookUrl, to, subject, htmlContent, plainText = "", senderName = "ELITE ARENA BD") {
+  const response = await fetch(webhookUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify({
       to: to.trim(),
       subject: subject,
       html: htmlContent,
-      text: plainText || "ELITE ARENA BD - Official Esports Notification",
+      text: plainText || "ELITE ARENA BD - Official Notification",
       name: senderName
     })
   });
@@ -53,7 +63,7 @@ async function sendViaGoogleRelay(to, subject, htmlContent, plainText = "", send
 }
 
 // ==========================================
-// 🎨 ১. নতুন ইউজার ওয়েলকাম ইমেইল টেমপ্লেট (আপনার দেওয়া ফাইনাল ডিজাইন)
+// 🎨 ১. নতুন ইউজার ওয়েলকাম ইমেইল টেমপ্লেট (আপনার দেওয়া ফাইনাল মিনিমাল ডিজাইন)
 // ==========================================
 function getWelcomeEmailTemplate(data) {
   const name = data.name || 'Player';
@@ -77,7 +87,6 @@ function getWelcomeEmailTemplate(data) {
 </head>
 <body style="margin: 0; padding: 0; background-color: #F8F9FA;">
 
-  <!-- প্রি-হেডার -->
   <div style="display: none; font-size: 1px; color: #F8F9FA; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
     ELITE ARENA BD-তে স্বাগতম। আপনার অ্যাকাউন্ট সম্পূর্ণ তৈরি।
   </div>
@@ -86,10 +95,8 @@ function getWelcomeEmailTemplate(data) {
     <tr>
       <td align="center">
         
-        <!-- মূল কার্ড -->
         <table role="presentation" width="100%" style="max-width: 480px; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #EAEAEA; overflow: hidden; text-align: center;">
           
-          <!-- হেডার / ব্র্যান্ড লোগো -->
           <tr>
             <td align="center" style="padding: 40px 32px 20px 32px;">
               <img src="https://elitearena.live/favicon.png" alt="ELITE ARENA BD" width="48" height="48" style="display: block; border-radius: 10px; margin-bottom: 16px;">
@@ -99,11 +106,9 @@ function getWelcomeEmailTemplate(data) {
             </td>
           </tr>
 
-          <!-- মেইন কনটেন্ট -->
           <tr>
             <td style="padding: 0 36px 36px 36px;">
               
-              <!-- প্রধান শিরোনাম -->
               <h1 style="color: #111827; font-size: 24px; font-weight: 700; margin: 0 0 12px 0; line-height: 1.35;">
                 স্বাগতম, <span style="color: #E50914;">${name}</span>!
               </h1>
@@ -112,7 +117,6 @@ function getWelcomeEmailTemplate(data) {
                 আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে। দেশের শীর্ষ টুর্নামেন্টগুলোতে অংশগ্রহণ করতে আপনি এখন সম্পূর্ণ প্রস্তুত।
               </p>
 
-              <!-- অ্যাকাউন্ট ইনফো (প্রথমে ইমেইল, নিচে সাপোর্ট পিন) -->
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #FAFAFA; border: 1px solid #F1F5F9; border-radius: 12px; margin-bottom: 26px; text-align: left;">
                 <tr>
                   <td style="padding: 13px 18px; border-bottom: 1px solid #EDEDED; font-size: 13.5px;">
@@ -128,7 +132,6 @@ function getWelcomeEmailTemplate(data) {
                 </tr>
               </table>
 
-              <!-- ফিচার হাইলাইটস (৩ লাইন) -->
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="text-align: left; font-size: 13.5px; color: #4B5563; line-height: 1.5;">
                 <tr>
                   <td style="padding-bottom: 12px; vertical-align: top; width: 24px; color: #E50914; font-weight: bold;">✓</td>
@@ -147,7 +150,6 @@ function getWelcomeEmailTemplate(data) {
             </td>
           </tr>
 
-          <!-- ফুটার -->
           <tr>
             <td style="background-color: #FAFAFA; border-top: 1px solid #F3F4F6; padding: 20px 24px; text-align: center;">
               <p style="color: #9CA3AF; font-size: 12px; margin: 0 0 4px 0;">
@@ -240,7 +242,7 @@ function getRebrandEmailTemplate(userName) {
 }
 
 // ==========================================
-// 🔍 ১-ক্লিক টেস্ট রাউট (Direct Webhook Test)
+// 🔍 ১-ক্লিক টেস্ট রাউট
 // ==========================================
 app.get('/api/test-email', async (req, res) => {
   const targetEmail = req.query.email || 'alaminarif770@gmail.com';
@@ -250,7 +252,7 @@ app.get('/api/test-email', async (req, res) => {
     let subject = 'স্বাগতম! ELITE ARENA BD-তে আপনার অ্যাকাউন্ট তৈরি সম্পন্ন হয়েছে';
     let plainText = 'স্বাগতম! ELITE ARENA BD-তে আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে।';
     let htmlContent = getWelcomeEmailTemplate({
-      name: 'Alamin Arif (Test Player)',
+      name: 'Alamin Arif',
       supportPin: '7842',
       email: targetEmail
     });
@@ -258,15 +260,15 @@ app.get('/api/test-email', async (req, res) => {
     if (emailType === 'offer') {
       subject = 'পবিত্র শুক্রবার স্পেশাল ডিপোজিট বোনাস! - ELITE ARENA BD';
       plainText = 'পবিত্র শুক্রবার স্পেশাল ডিপোজিট বোনাস অফার! আজই ডিপোজিট করুন এবং আকর্ষণীয় বোনাস উপভোগ করুন।';
-      htmlContent = getFridayOfferEmailTemplate('Alamin Arif (Test Player)');
+      htmlContent = getFridayOfferEmailTemplate('Alamin Arif');
     } else if (emailType === 'comeback') {
       subject = 'জরুরী নোটিশ: LONE WOLF BD এখন ELITE ARENA BD!';
       plainText = 'জরুরী নোটিশ: LONE WOLF BD এর নাম পরিবর্তন করে ELITE ARENA BD করা হয়েছে।';
-      htmlContent = getRebrandEmailTemplate('Alamin Arif (Test Player)');
+      htmlContent = getRebrandEmailTemplate('Alamin Arif');
     }
 
-    // গুগল রিলে দিয়ে সরাসরি জিমেইল থেকে পাঠানো
-    const result = await sendViaGoogleRelay(targetEmail, subject, htmlContent, plainText, "ELITE ARENA BD");
+    const selectedWebhook = ALL_7_WEBHOOKS[1].url; // welcome webhook
+    const result = await sendViaWebhook(selectedWebhook, targetEmail, subject, htmlContent, plainText, "ELITE ARENA BD");
 
     return res.json({ 
       success: true, 
@@ -294,9 +296,11 @@ db.ref('users').on('child_added', async (snapshot) => {
       const now = Date.now();
       const joinedTime = user.joinedAt ? new Date(user.joinedAt).getTime() : now;
 
-      // শুধুমাত্র সাম্প্রতিক (গত ২ ঘণ্টার মধ্যে জয়েন করা) নতুন ইউজারকে পাঠাবে
+      // শুধুমাত্র গত ২ ঘণ্টার মধ্যে জয়েন করা নতুন ইউজারকে পাঠাবে
       if ((now - joinedTime) < 2 * 60 * 60 * 1000) {
-        await sendViaGoogleRelay(
+        const welcomeWebhook = ALL_7_WEBHOOKS.find(w => w.name === "welcome") || ALL_7_WEBHOOKS[1];
+        await sendViaWebhook(
+          welcomeWebhook.url,
           user.email,
           'স্বাগতম! ELITE ARENA BD-তে আপনার অ্যাকাউন্ট তৈরি সম্পন্ন হয়েছে',
           getWelcomeEmailTemplate({
@@ -318,7 +322,7 @@ db.ref('users').on('child_added', async (snapshot) => {
 });
 
 // ==========================================
-// 🚀 ২. সবার জন্য অফার ব্রডকাস্ট API
+// 🚀 ২. সবার জন্য অফার ব্রডকাস্ট API (৭টি জিমেইলে লোড ব্যালেন্স)
 // ==========================================
 app.post('/api/broadcast-offer', async (req, res) => {
   try {
@@ -356,7 +360,7 @@ app.post('/api/broadcast-offer', async (req, res) => {
 });
 
 // ==========================================
-// 🎯 ৩. পুরনো ও ড্রপ-আউট ইউজারদের কামব্যাক ব্রডকাস্ট API
+// 🎯 ৩. পুরনো ও ড্রপ-আউট ইউজারদের কামব্যাক ব্রডকাস্ট API (স্মার্ট ফিল্টার্ড)
 // ==========================================
 app.post('/api/broadcast-comeback', async (req, res) => {
   try {
@@ -376,14 +380,14 @@ app.post('/api/broadcast-comeback', async (req, res) => {
 
       const lastActive = u.last_active;
 
-      // 🛑 স্মার্ট ফিল্টারিং: যারা নতুন অ্যাপ খোলেনি বা ৩০ দিন ধরে নেই
+      // 🛑 স্মার্ট ফিল্টারিং: যারা নতুন অ্যাপ এখনও একবারও খোলেনি বা ৩০ দিন ধরে নেই
       if (!lastActive || (now - lastActive) > THIRTY_DAYS_MS) {
         queue.push({ uid, email: u.email.trim(), name: u.name || 'Player' });
       }
     }
 
     if (queue.length === 0) {
-      return res.json({ success: false, message: 'কোনো ড্রপ-আউট বা পুরনো ইউজার পাওয়া যায়নি।' });
+      return res.json({ success: false, message: 'কোনো ড্রপ-আউট বা পুরনো ইউজার পাওয়া যায়নি। সবাই অ্যাক্টিভ আছে!' });
     }
 
     startCampaignBroadcast(
@@ -405,7 +409,7 @@ app.post('/api/broadcast-comeback', async (req, res) => {
 });
 
 // ==========================================
-// ⚙️ ব্যাকগ্রাউন্ড ব্রডকাস্ট ইঞ্জিন
+// ⚙️ ব্যাকগ্রাউন্ড মাল্টি-জিমেইল রোটেশন ইঞ্জিন (৭টি জিমেইলে ৩,৫০০ ডিস্ট্রিবিউশন)
 // ==========================================
 async function startCampaignBroadcast(queue, campaignName, templateFunc, subject, plainText) {
   const total = queue.length;
@@ -430,16 +434,24 @@ async function startCampaignBroadcast(queue, campaignName, templateFunc, subject
 
   for (let i = 0; i < total; i++) {
     const item = queue[i];
+    const selectedAccount = ALL_7_WEBHOOKS[i % ALL_7_WEBHOOKS.length];
     let isSuccess = false;
     let failReason = null;
 
     try {
-      await sendViaGoogleRelay(item.email, subject, templateFunc(item.name), plainText, "ELITE ARENA BD");
+      await sendViaWebhook(
+        selectedAccount.url, 
+        item.email, 
+        subject, 
+        templateFunc(item.name), 
+        plainText, 
+        "ELITE ARENA BD"
+      );
       isSuccess = true;
       successCount++;
     } catch (err) {
       isSuccess = false;
-      failReason = err.message || 'Relay Error';
+      failReason = err.message || 'Webhook Relay Error';
       failCount++;
     }
 
@@ -448,7 +460,9 @@ async function startCampaignBroadcast(queue, campaignName, templateFunc, subject
     const logTime = new Date().toLocaleTimeString('en-US', { hour12: true });
 
     await logsRef.push({
-      message: isSuccess ? `✅ [${logTime}] (${processed}/${total}) Sent: ${item.email}` : `❌ [${logTime}] (${processed}/${total}) Failed: ${item.email} (${failReason})`,
+      message: isSuccess 
+        ? `✅ [${logTime}] (${processed}/${total}) Sent via ${selectedAccount.name}: ${item.email}` 
+        : `❌ [${logTime}] (${processed}/${total}) Failed via ${selectedAccount.name}: ${item.email} (${failReason})`,
       timestamp: Date.now()
     });
 
@@ -461,7 +475,7 @@ async function startCampaignBroadcast(queue, campaignName, templateFunc, subject
       lastUpdated: Date.now()
     });
 
-    await new Promise(res => setTimeout(res, 400));
+    await new Promise(res => setTimeout(res, 350));
   }
 
   await statusRef.update({ isRunning: false, statusText: 'Completed', endTime: Date.now() });
@@ -469,4 +483,4 @@ async function startCampaignBroadcast(queue, campaignName, templateFunc, subject
 
 // 🟢 ক্লাউড হোস্ট বাইন্ডিং
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Elite Arena Google Relay Email Service Running on Port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Elite Arena 7-Gmail Enterprise Service Running on Port ${PORT}`));
