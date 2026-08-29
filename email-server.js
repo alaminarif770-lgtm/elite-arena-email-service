@@ -53,7 +53,7 @@ async function sendViaGoogleRelay(to, subject, htmlContent, plainText = "", send
 }
 
 // ==========================================
-// 🎨 ১. নতুন ইউজার ওয়েলকাম ইমেইল টেমপ্লেট (আপনার দেওয়া নতুন মিনিমাল ডিজাইন)
+// 🎨 ১. নতুন ইউজার ওয়েলকাম ইমেইল টেমপ্লেট (আপনার দেওয়া ফাইনাল ডিজাইন)
 // ==========================================
 function getWelcomeEmailTemplate(data) {
   const name = data.name || 'Player';
@@ -61,69 +61,6 @@ function getWelcomeEmailTemplate(data) {
   const email = data.email || '';
 
   return `
-<!DOCTYPE html>
-<html lang="bn">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome to ELITE ARENA BD</title>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
-  <style>
-    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
-    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
-    img { -ms-interpolation-mode: bicubic; border: 0; height: auto; outline: none; text-decoration: none; }
-    body { margin: 0; padding: 0; width: 100% !important; background-color: #F8F9FA; font-family: 'Hind Siliguri', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-  </style>
-</head>
-<body style="margin: 0; padding: 0; background-color: #F8F9FA;">
-
-  <!-- প্রি-হেডার -->
-  <div style="display: none; font-size: 1px; color: #F8F9FA; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
-    ELITE ARENA BD-তে স্বাগতম। আপনার অ্যাকাউন্ট সম্পূর্ণ তৈরি।
-  </div>
-
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #F8F9FA; padding: 48px 16px;">
-    <tr>
-      <td align="center">
-        
-        <!-- মূল কার্ড -->
-        <table role="presentation" width="100%" style="max-width: 480px; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #EAEAEA; overflow: hidden; text-align: center;">
-          
-          <!-- হেডার / ব্র্যান্ড লোগো -->
-          <tr>
-            <td align="center" style="padding: 40px 32px 24px 32px;">
-              <img src="https://elitearena.live/favicon.png" alt="ELITE ARENA BD" width="48" height="48" style="display: block; border-radius: 10px; margin-bottom: 16px;">
-              <div style="font-size: 13px; font-weight: 800; color: #111827; letter-spacing: 2px; text-transform: uppercase; font-family: 'Plus Jakarta Sans', sans-serif;">
-                ELITE ARENA <span style="color: #E50914;">BD</span>
-              </div>
-            </td>
-          </tr>
-
-          <!-- মেইন কনটেন্ট -->
-          <tr>
-            <td style="padding: 0 36px 36px 36px;">
-              
-              <!-- প্রধান শিরোনাম -->
-              <h1 style="color: #111827; font-size: 24px; font-weight: 700; margin: 0 0 12px 0; line-height: 1.35;">
-                স্বাগতম, <span style="color: #E50914;">${name}</span>!
-              </h1>
-              
-              <p style="color: #6B7280; font-size: 15px; line-height: 1.6; margin: 0 0 28px 0;">
-                আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে। দেশের শীর্ষ টুর্নামেন্টগুলোতে অংশগ্রহণ করতে আপনি এখন সম্পূর্ণ প্রস্তুত।
-              </p>
-
-              <!-- প্রাইমারি কল-টু-অ্যাকশন বাটন -->
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-bottom: 30px;">
-                <tr>
-                  <td align="center">
-                    <a href="https://elitearena.live" target="_blank" style="display: block; width: 100%; max-width: 280px; background-color: #E50914; color: #FFFFFF; text-decoration: none; font-size: 15px; font-weight: 700; padding: 14px 20px; border-radius: 8px; box-sizing: border-box;">
-                      খেলা শুরু করুন
-                    </a>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- ডিভাইডার -->
 <!DOCTYPE html>
 <html lang="bn">
 <head>
@@ -168,7 +105,7 @@ function getWelcomeEmailTemplate(data) {
               
               <!-- প্রধান শিরোনাম -->
               <h1 style="color: #111827; font-size: 24px; font-weight: 700; margin: 0 0 12px 0; line-height: 1.35;">
-                স্বাগতম, <span style="color: #E50914;">{{username}}</span>!
+                স্বাগতম, <span style="color: #E50914;">${name}</span>!
               </h1>
               
               <p style="color: #6B7280; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
@@ -180,13 +117,13 @@ function getWelcomeEmailTemplate(data) {
                 <tr>
                   <td style="padding: 13px 18px; border-bottom: 1px solid #EDEDED; font-size: 13.5px;">
                     <span style="color: #6B7280;">ইমেইল:</span>
-                    <strong style="color: #111827; float: right; font-weight: 600;">{{email}}</strong>
+                    <strong style="color: #111827; float: right; font-weight: 600;">${email}</strong>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding: 13px 18px; font-size: 13.5px;">
                     <span style="color: #6B7280;">সাপোর্ট পিন:</span>
-                    <strong style="color: #E50914; float: right; font-weight: 800; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14.5px; letter-spacing: 0.5px;">{{support_pin}}</strong>
+                    <strong style="color: #E50914; float: right; font-weight: 800; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14.5px; letter-spacing: 0.5px;">#${supportPin}</strong>
                   </td>
                 </tr>
               </table>
@@ -439,6 +376,7 @@ app.post('/api/broadcast-comeback', async (req, res) => {
 
       const lastActive = u.last_active;
 
+      // 🛑 স্মার্ট ফিল্টারিং: যারা নতুন অ্যাপ খোলেনি বা ৩০ দিন ধরে নেই
       if (!lastActive || (now - lastActive) > THIRTY_DAYS_MS) {
         queue.push({ uid, email: u.email.trim(), name: u.name || 'Player' });
       }
