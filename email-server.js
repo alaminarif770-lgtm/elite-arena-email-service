@@ -53,7 +53,7 @@ async function sendViaGoogleRelay(to, subject, htmlContent, plainText = "", send
 }
 
 // ==========================================
-// 🎨 ১. নতুন ইউজার ওয়েলকাম ইমেইল টেমপ্লেট (আপনার দেওয়া নতুন প্রিমিয়াম ডিজাইন)
+// 🎨 ১. নতুন ইউজার ওয়েলকাম ইমেইল টেমপ্লেট (আপনার নতুন সম্পূর্ণ ডিজাইন)
 // ==========================================
 function getWelcomeEmailTemplate(data) {
   const name = data.name || 'Player';
@@ -386,6 +386,7 @@ app.post('/api/broadcast-comeback', async (req, res) => {
 
       const lastActive = u.last_active;
 
+      // 🛑 স্মার্ট ফিল্টারিং: যারা নতুন অ্যাপ খোলেনি বা ৩০ দিন ধরে নেই
       if (!lastActive || (now - lastActive) > THIRTY_DAYS_MS) {
         queue.push({ uid, email: u.email.trim(), name: u.name || 'Player' });
       }
