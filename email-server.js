@@ -7,9 +7,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 🟢 Queen SMTP REST API কনফিগারেশন (Render Environment থেকে সরাসরি লোড হবে)
-const QUEEN_SMTP_API_URL = "https://api.queensmtp.com/v1/send";
-const QUEEN_SMTP_API_KEY = process.env.QUEEN_SMTP_API_KEY;
+// 🟢 Queen SMTP Official REST API Endpoint
+const QUEEN_SMTP_API_URL = "https://api.queensmtp.com/v1/messages";
+const QUEEN_SMTP_API_KEY = process.env.QUEEN_SMTP_API_KEY || "sk_live_f9beHLYd0mmNYXfpbDCtP6KE2JfCtF5";
 const DOMAIN = "elitearena.live";
 
 // 🟢 হেলথ চেক রুট
@@ -40,6 +40,8 @@ const db = admin.database();
 // ⚡ Queen SMTP REST API দিয়ে মেইল পাঠানোর মূল ফাংশন
 // ==========================================
 async function sendQueenEmail({ from, to, subject, html, text }) {
+  const recipients = Array.isArray(to) ? to : [to.trim()];
+
   const response = await fetch(QUEEN_SMTP_API_URL, {
     method: 'POST',
     headers: {
@@ -48,13 +50,18 @@ async function sendQueenEmail({ from, to, subject, html, text }) {
     },
     body: JSON.stringify({
       from: from,
-      to: to.trim(),
+      to: recipients,
       subject: subject,
       html: html,
       text: text || "ELITE ARENA BD - Official Esports Notification"
     })
   });
-  return await response.json();
+
+  const responseData = await response.json();
+  if (!response.ok) {
+    throw new Error(responseData.message || responseData.error || `HTTP Error ${response.status}`);
+  }
+  return responseData;
 }
 
 // ⏰ সময় ফরম্যাট ফাংশন
@@ -154,40 +161,38 @@ function getOtpEmailTemplate(userName, otpCode) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ELITE ARENA BD - OTP Verification</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; padding: 40px 15px;">
-    <tr><td align="center">
-      <table role="presentation" width="100%" style="max-width: 520px; background-color: #ffffff; border-radius: 16px; border: 1px solid #edf2f7; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04); overflow: hidden; text-align: center;">
-        <tr><td style="padding: 40px 30px 20px 30px;">
-          <img src="https://elitearena.live/favicon.png" alt="ELITE ARENA BD" width="56" height="56" style="display: block; margin: 0 auto; border-radius: 12px;">
-          <h3 style="margin: 12px 0 0 0; color: #0f172a; font-size: 16px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">ELITE ARENA BD</h3>
-        </td></tr>
-        <tr><td style="padding: 10px 35px 35px 35px;">
-          <h1 style="color: #0f172a; font-size: 22px; font-weight: 700; line-height: 1.4; margin: 0 0 14px 0;">
-            পাসওয়ার্ড রিকভারি কোড,<br><span style="color: #e63946;">${name}</span>
-          </h1>
-          <p style="color: #475569; font-size: 15px; line-height: 1.7; margin: 0 0 24px 0;">
-            আপনার <strong>ELITE ARENA BD</strong> অ্যাকাউন্টের পাসওয়ার্ড রিসেট করার জন্য নিচে ৬ ডিজিটের ওটিপি কোডটি প্রদান করা হলো। এটি কারো সাথে শেয়ার করবেন না।
-          </p>
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #fff5f5; border: 1px solid #ffe3e3; border-radius: 12px; margin-bottom: 24px;">
-            <tr><td align="center" style="padding: 20px; font-size: 32px; font-weight: 800; color: #e63946; letter-spacing: 8px; font-family: monospace;">
-              ${otpCode}
-            </td></tr>
-          </table>
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; border: 1px solid #edf2f7; border-radius: 12px; margin-bottom: 10px;">
-            <tr><td style="padding: 14px 18px; text-align: left;">
-              <div style="color: #64748b; font-size: 13px; font-weight: 500; line-height: 1.5;">
-                ⚠️ এই ওটিপি কোডটির মেয়াদ আগামী <strong>৫ মিনিট</strong>। আপনি পাসওয়ার্ড রিকভারি রিকোয়েস্ট না করে থাকলে এই ইমেইলটি উপেক্ষা করুন।
-              </div>
-            </td></tr>
-          </table>
-        </td></tr>
-        <tr><td style="padding: 24px 30px; background-color: #fcfdfe; border-top: 1px solid #f1f5f9;">
-          <p style="color: #94a3b8; font-size: 12px; margin: 0 0 4px 0; font-weight: 500;">© 2026 ELITE ARENA BD. All rights reserved.</p>
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: sans-serif;">
+  <table width="100%" style="padding: 40px 15px;"><tr><td align="center">
+    <table width="100%" style="max-width: 520px; background-color: #ffffff; border-radius: 16px; border: 1px solid #edf2f7; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04); overflow: hidden; text-align: center;">
+      <tr><td style="padding: 40px 30px 20px 30px;">
+        <img src="https://elitearena.live/favicon.png" alt="ELITE ARENA BD" width="56" height="56" style="display: block; margin: 0 auto; border-radius: 12px;">
+        <h3 style="margin: 12px 0 0 0; color: #0f172a; font-size: 16px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">ELITE ARENA BD</h3>
+      </td></tr>
+      <tr><td style="padding: 10px 35px 35px 35px;">
+        <h1 style="color: #0f172a; font-size: 22px; font-weight: 700; line-height: 1.4; margin: 0 0 14px 0;">
+          পাসওয়ার্ড রিকভারি কোড,<br><span style="color: #e63946;">${name}</span>
+        </h1>
+        <p style="color: #475569; font-size: 15px; line-height: 1.7; margin: 0 0 24px 0;">
+          আপনার <strong>ELITE ARENA BD</strong> অ্যাকাউন্টের পাসওয়ার্ড রিসেট করার জন্য নিচে ৬ ডিজিটের ওটিপি কোডটি প্রদান করা হলো। এটি কারো সাথে শেয়ার করবেন না।
+        </p>
+        <table width="100%" style="background-color: #fff5f5; border: 1px solid #ffe3e3; border-radius: 12px; margin-bottom: 24px;">
+          <tr><td align="center" style="padding: 20px; font-size: 32px; font-weight: 800; color: #e63946; letter-spacing: 8px; font-family: monospace;">
+            ${otpCode}
+          </td></tr>
+        </table>
+        <table width="100%" style="background-color: #f8fafc; border: 1px solid #edf2f7; border-radius: 12px; margin-bottom: 10px;">
+          <tr><td style="padding: 14px 18px; text-align: left;">
+            <div style="color: #64748b; font-size: 13px; font-weight: 500; line-height: 1.5;">
+              ⚠️ এই ওটিপি কোডটির মেয়াদ আগামী <strong>৫ মিনিট</strong>। আপনি পাসওয়ার্ড রিকভারি রিকোয়েস্ট না করে থাকলে এই ইমেইলটি উপেক্ষা করুন।
+            </div>
+          </td></tr>
+        </table>
+      </td></tr>
+      <tr><td style="padding: 24px 30px; background-color: #fcfdfe; border-top: 1px solid #f1f5f9;">
+        <p style="color: #94a3b8; font-size: 12px; margin: 0 0 4px 0; font-weight: 500;">© 2026 ELITE ARENA BD. All rights reserved.</p>
+      </td></tr>
+    </table>
+  </td></tr></table>
 </body>
 </html>`;
 }
@@ -603,7 +608,6 @@ app.post('/api/broadcast-comeback', async (req, res) => {
 
       const lastActive = u.last_active;
 
-      // 🛑 স্মার্ট ফিল্টারিং: যারা নতুন অ্যাপ এখনও একবারও খোলেনি বা ৩০ দিন ধরে নেই
       if (!lastActive || (now - lastActive) > THIRTY_DAYS_MS) {
         queue.push({ uid, email: u.email.trim(), name: u.name || 'Player' });
       }
